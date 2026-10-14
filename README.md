@@ -235,7 +235,7 @@ $$CAVS = 100 - \left( 0.30 \cdot V_{att} + 0.25 \cdot A_{tt} + 0.25 \cdot I_{mk}
 - **Registration Number:** 24MIM10014
 - **Degree Program:** Integrated M.Tech in Computer Science & Engineering
 - **Course:** Computer Vision (CSE3002)
-- **Institution:** Vellore Institute of Technology (VIT), Vellore
+- **Institution:** Vellore Institute of Technology (VIT), bhopal
 - **Evaluation:** VITyarthi Flipped Course Evaluation (100% Rubric Alignment)
 
 ---
