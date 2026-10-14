@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartVision-Ed | CV-Based Student Engagement & Early Dropout Warning System</title>
+  <meta name="description" content="Computer Vision-powered real-time classroom attention telemetry, facial affect analysis, and multi-modal early dropout risk warning system. Built for VIT Course Evaluation by Khushal Mahajan (24MIM10014).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Navigation Bar -->
+    <header class="navbar" id="main-nav">
+      <div class="brand-container">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">SmartVision-Ed</h1>
+          <p class="brand-subtitle">CV Attention Telemetry & Academic Dropout Early Warning</p>
+        </div>
+      </div>
+
+      <div class="user-badge" id="student-identity-badge">
+        <span class="live-dot pulse"></span>
+        <div class="badge-info">
+          <span class="student-name">Khushal Mahajan</span>
+          <span class="student-reg">24MIM10014 &bull; Computer Vision (CSE3002)</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top Metrics Overview -->
+    <section class="metrics-grid" aria-label="Classroom Overview Metrics">
+      <div class="metric-card" id="card-enrolled">
+        <div class="metric-header">
+          <span class="metric-label">Monitored Cohort</span>
+          <span class="metric-icon">👥</span>
+        </div>
+        <div class="metric-value" id="val-enrolled">8 Students</div>
+        <div class="metric-subtext">Active Session: CSE3002-L2</div>
+      </div>
+
+      <div class="metric-card" id="card-avg-attention">
+        <div class="metric-header">
+          <span class="metric-label">Mean Attention Index</span>
+          <span class="metric-icon">👁️</span>
+        </div>
+        <div class="metric-value text-emerald" id="val-avg-attention">78.4%</div>
+        <div class="metric-subtext">Spatial-temporal EMA Average</div>
+      </div>
+
+      <div class="metric-card" id="card-attendance">
+        <div class="metric-header">
+          <span class="metric-label">Mean Attendance</span>
+          <span class="metric-icon">📊</span>
+        </div>
+        <div class="metric-value text-cyan" id="val-avg-attendance">80.3%</div>
+        <div class="metric-subtext">Debarment Baseline: 75.0%</div>
+      </div>
+
+      <div class="metric-card highlight-danger" id="card-critical-risk">
+        <div class="metric-header">
+          <span class="metric-label">Early Dropout Warnings</span>
+          <span class="metric-icon">⚠️</span>
+        </div>
+        <div class="metric-value text-rose" id="val-critical-risk">2 Flagged</div>
+        <div class="metric-subtext">Requires Immediate Proctor Action</div>
+      </div>
+    </section>
+
+    <!-- Main Working Grid -->
+    <main class="dashboard-grid">
+      <!-- Left Column: Vision Telemetry & Live Stream -->
+      <section class="vision-panel panel" aria-labelledby="vision-panel-title">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <h2 id="vision-panel-title" class="panel-title">Computer Vision Stream & Landmark HUD</h2>
+            <p class="panel-desc">Real-time PnP Head Pose, Eye Aspect Ratio (EAR), and Affect State Extraction</p>
+          </div>
+          <div class="panel-actions">
+            <button class="btn btn-secondary btn-sm" id="btn-toggle-privacy">
+              <span id="privacy-icon">🔒</span> Toggle Privacy Blur
+            </button>
+          </div>
+        </div>
+
+        <div class="stream-viewport-container">
+          <div class="video-wrapper">
+            <img id="stream-preview" src="" alt="Live Telemetry Feed" style="display:none;" />
+            <canvas id="vision-canvas" width="640" height="480"></canvas>
+            <div class="viewport-hud-badges">
+              <span class="hud-pill" id="hud-fps">30.0 FPS</span>
+              <span class="hud-pill" id="hud-resolution">640x480</span>
+              <span class="hud-pill" id="hud-privacy-badge">De-identification: OFF</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vision Simulation Controls -->
+        <div class="simulation-controls">
+          <div class="control-group">
+            <label for="select-sim-state">Simulated Student Cognitive State:</label>
+            <select id="select-sim-state" class="form-select">
+              <option value="Focused">Focused (Attentive, Screen-facing, EAR=0.30)</option>
+              <option value="Distracted">Distracted (Looking away, Yaw=+48 deg)</option>
+              <option value="Drowsy">Drowsy (Fatigue, Yawning, EAR=0.14)</option>
+              <option value="Confused">Confused (Head tilt, Brow furrowed)</option>
+              <option value="Neutral">Neutral (Baseline Attention)</option>
+            </select>
+          </div>
+          <div class="control-actions">
+            <button class="btn btn-primary" id="btn-stream-toggle">Pause Stream</button>
+            <button class="btn btn-secondary" id="btn-trigger-blink">Simulate Blink</button>
+          </div>
+        </div>
+
+        <!-- Live Telemetry Matrix -->
+        <div class="telemetry-matrix">
+          <div class="tele-item">
+            <span class="tele-label">Instantaneous Attention</span>
+            <span class="tele-val text-emerald" id="tele-instant">86.2%</span>
+          </div>
+          <div class="tele-item">
+            <span class="tele-label">Smoothed EMA</span>
+            <span class="tele-val text-cyan" id="tele-smoothed">84.8%</span>
+          </div>
+          <div class="tele-item">
+            <span class="tele-label">Avg Eye Aspect Ratio</span>
+            <span class="tele-val" id="tele-ear">0.29</span>
+          </div>
+          <div class="tele-item">
+            <span class="tele-label">Head Yaw / Pitch</span>
+            <span class="tele-val" id="tele-pose">+2.4° / -1.8°</span>
+          </div>
+          <div class="tele-item">
+            <span class="tele-label">Dominant Affect</span>
+            <span class="tele-val text-emerald" id="tele-affect">FOCUSED (0.84)</span>
+          </div>
+          <div class="tele-item">
+            <span class="tele-label">Pseudonym Token</span>
+            <span class="tele-val text-mono" id="tele-token">ANON-A83F291B</span>
+          </div>
+        </div>
+
+        <!-- Live Temporal Attention Dynamics Chart -->
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3>Temporal Attention Dynamics (Raw vs EMA Filtered)</h3>
+            <span class="legend-indicator">
+              <span class="legend-dot dot-raw"></span> Raw
+              <span class="legend-dot dot-ema"></span> Smoothed
+            </span>
+          </div>
+          <canvas id="attention-chart-canvas" width="600" height="150"></canvas>
+        </div>
+      </section>
+
+      <!-- Right Column: Academic Risk Engine & Student Roster -->
+      <section class="risk-panel panel" aria-labelledby="risk-panel-title">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <h2 id="risk-panel-title" class="panel-title">Multi-Modal Academic Risk Engine</h2>
+            <p class="panel-desc">Fuses Vision Telemetry + Attendance + Assessment Marks + LMS Engagement</p>
+          </div>
+          <div class="filter-group">
+            <button class="filter-pill active" data-filter="all">All (8)</button>
+            <button class="filter-pill text-rose" data-filter="critical">Critical (2)</button>
+            <button class="filter-pill text-amber" data-filter="moderate">Moderate (2)</button>
+            <button class="filter-pill text-emerald" data-filter="low">Low (4)</button>
+          </div>
+        </div>
+
+        <!-- Student Roster Cards List -->
+        <div class="student-roster" id="student-roster-container">
+          <!-- Dynamically populated via JS -->
+        </div>
+
+        <!-- Interactive What-If Scenario Risk Simulator -->
+        <div class="simulator-box">
+          <h3 class="simulator-title">Interactive "What-If" Dropout Risk Calculator</h3>
+          <p class="simulator-desc">Adjust student behavioral inputs to observe real-time CAVS (Composite Academic Vulnerability Score) shifts.</p>
+          
+          <div class="slider-row">
+            <div class="slider-item">
+              <div class="slider-labels">
+                <span>Lecture Attendance (%)</span>
+                <span class="slider-val text-cyan" id="sim-val-att">85%</span>
+              </div>
+              <input type="range" min="30" max="100" value="85" id="slider-att" class="range-slider">
+            </div>
+
+            <div class="slider-item">
+              <div class="slider-labels">
+                <span>Internal Marks (100)</span>
+                <span class="slider-val text-emerald" id="sim-val-int">78</span>
+              </div>
+              <input type="range" min="20" max="100" value="78" id="slider-int" class="range-slider">
+            </div>
+
+            <div class="slider-item">
+              <div class="slider-labels">
+                <span>LMS Activity Score (%)</span>
+                <span class="slider-val text-purple" id="sim-val-lms">80%</span>
+              </div>
+              <input type="range" min="10" max="100" value="80" id="slider-lms" class="range-slider">
+            </div>
+
+            <div class="slider-item">
+              <div class="slider-labels">
+                <span>Vision Attention Score (%)</span>
+                <span class="slider-val text-amber" id="sim-val-vis">75%</span>
+              </div>
+              <input type="range" min="15" max="100" value="75" id="slider-vis" class="range-slider">
+            </div>
+          </div>
+
+          <div class="sim-result-card" id="sim-result-container">
+            <div class="sim-result-header">
+              <div>
+                <div class="sim-result-title">Projected Vulnerability Score (CAVS)</div>
+                <div class="sim-result-score text-cyan" id="sim-cavs-score">20.5 / 100</div>
+              </div>
+              <div class="risk-badge badge-low" id="sim-risk-badge">LOW RISK</div>
+            </div>
+            <div class="sim-formula-note">
+              Formula: <code>CAVS = 100 - [0.30×Vision + 0.25×Attendance + 0.25×Internals + 0.20×LMS]</code>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Detailed Student Modal -->
+    <div class="modal-backdrop" id="student-modal" style="display:none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title" id="modal-student-name">Khushal Mahajan (24MIM10014)</h3>
+            <span class="modal-subtitle" id="modal-student-course">Course: CSE3002 - Computer Vision</span>
+          </div>
+          <button class="modal-close-btn" id="modal-close">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="modal-metrics-row">
+            <div class="modal-metric-card">
+              <span class="label">Attendance</span>
+              <span class="val text-cyan" id="modal-att">94.5%</span>
+            </div>
+            <div class="modal-metric-card">
+              <span class="label">Internal Marks</span>
+              <span class="val text-emerald" id="modal-int">92.0</span>
+            </div>
+            <div class="modal-metric-card">
+              <span class="label">LMS Score</span>
+              <span class="val text-purple" id="modal-lms">88.5%</span>
+            </div>
+            <div class="modal-metric-card">
+              <span class="label">Visual Attention</span>
+              <span class="val text-amber" id="modal-vis">86.4%</span>
+            </div>
+          </div>
+
+          <div class="modal-section">
+            <h4>Risk Diagnostics & Contributing Factors</h4>
+            <ul class="factors-list" id="modal-factors">
+              <!-- Factors list -->
+            </ul>
+          </div>
+
+          <div class="modal-section">
+            <h4>Prescriptive Academic Interventions</h4>
+            <div class="interventions-box" id="modal-interventions">
+              <!-- Interventions -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p><strong>SmartVision-Ed</strong> &mdash; VITyarthi Project Submission | Course: Computer Vision (CSE3002)</p>
+        <p>Designed and Implemented by <strong>Khushal Mahajan</strong> (Reg. No: <strong>24MIM10014</strong>) | Vellore Institute of Technology</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
